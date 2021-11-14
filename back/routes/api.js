@@ -797,7 +797,7 @@ router.post("/users", isNotLoggedIn, async (req, res, next) => {
       },
     });
     if (exUser) {
-      return res.status(403).send("이미 사용 중인 아이디입니다.");
+      return res.status(403).send("You have signed up");
     }
     const hashedPassword = await bcrypt.hash(req.body.password, 12);
     const user = await User.create({
