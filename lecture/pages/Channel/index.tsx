@@ -1,11 +1,11 @@
 import React from 'react'
 
-function ChatBox() {
+function Channel() {
   return (
     <div>
-      ChatBox
+      
     </div>
   )
 }
 
-export default ChatBox
+export default Channel

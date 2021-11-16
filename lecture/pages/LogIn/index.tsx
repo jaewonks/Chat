@@ -1,15 +1,14 @@
-import React, { useCallback, useState } from 'react';
-import { Header, Label, Form, Input, Button, LinkContainer, Error } from './styles';
-import { Link, Redirect } from 'react-router-dom';
-import fetcher from '@utils/fetcher';
 import useInput from '@hooks/useInput';
+import { Header, Label, Form, Input, Button, LinkContainer, Error } from './styles';
+import fetcher from '@utils/fetcher';
 import axios from 'axios';
+import React, { useCallback, useState } from 'react';
+import { Link, Redirect } from 'react-router-dom';
 import useSWR from 'swr';
 
-const SignIn = () => {
-  const { data: userData, error, revalidate, mutate } = useSWR('/api/user', fetcher);
-  const [ signInError, setSignInError ] = useState(false);
-
+const LogIn = () => {
+  const { data: userData, error, revalidate, mutate } = useSWR('/api/users', fetcher);
+  const [ logInError, setLogInError ] = useState(false);
   const [ email, onChangeEmail ] = useInput('');
   const [ password, onChangePassword ] = useInput('');
   // setEmail and setPassword 는 사용하지 않기 때문 
@@ -17,9 +16,9 @@ const SignIn = () => {
   const onSubmit = useCallback((e) => {
     e.preventDefault();
     // 이미 로그인한 사람들은 페이지로 접근 못하도록
-    setSignInError(false)
+    setLogInError(false)
       axios
-        .post('api/users/signin', {
+        .post('api/users/login', {
           email,
           password
         })
@@ -29,7 +28,7 @@ const SignIn = () => {
         .catch((error) => {
           console.log(error.response);
           // 문법확인해보기
-          setSignInError(error.response?.data?.statusCode === 401);
+          setLogInError(error.response?.data?.statusCode === 401);
         })
   }, 
   [email, password],
@@ -40,12 +39,12 @@ const SignIn = () => {
   }
 
   if (userData) {
-    return <Redirect to='/workspace/chat/channel/general' />
+    return <Redirect to='/workspace/sleact/channel/일반' />
   }
   console.log(error, userData);
   if (!error && userData) {
-    console.log('You Signed In');
-    return <Redirect to='/workspace/chat/channel/general' />
+    console.log('You Logged In');
+    return <Redirect to='/workspace/sleact/channel/일반' />
   }
 
   return (
@@ -63,9 +62,9 @@ const SignIn = () => {
           <div>
             <Input type='password' id='password' value={password} onChange={onChangePassword} />
           </div>
-          {signInError && <Error>Your email and password doesn't match</Error>}
+          {logInError && <Error>Your email and password doesn't match</Error>}
         </Label>
-        <Button type='submit'>Sign Up</Button>
+        <Button type='submit'>Login</Button>
       </Form>
       <LinkContainer>
         Are you not a member yet?&nbsp;
@@ -75,4 +74,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default LogIn;

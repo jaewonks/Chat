@@ -1,10 +1,13 @@
-import React, { useCallback, useState } from 'react';
-import { Header, Label, Form, Input, Button, LinkContainer, Error } from './styles';
 import useInput from '@hooks/useInput';
-import { Link } from 'react-router-dom'
+import fetcher from '@utils/fetcher';
+import React, { useCallback, useState } from 'react';
 import axios from 'axios';
+import useSWR from 'swr';
+import { Header, Label, Form, Input, Button, LinkContainer, Error, Success } from './styles';
+import { Link, Redirect } from 'react-router-dom'
 
 const SignUp = () => {
+  const { data, error, revalidate } = useSWR('/api/users', fetcher);
   /*
   const [ email, setEmail ] = useState('');
   const onChangeEmail = useCallback((e) => {
@@ -18,22 +21,26 @@ const SignUp = () => {
   */
   const [ email, onChangeEmail ] = useInput('');
   const [ nickname, onChangeNickname ] = useInput('');
-  const [ password, setPassword ] = useState('');
-  const [ passwordCheck, setPasswordCheck ] = useState('');
+  const [ password, , setPassword ] = useInput('');
+  const [ passwordCheck, , setPasswordCheck ] = useInput('');
   const [ mismatchError, setMismatchError ] = useState(false);
   const [ signUpError, setSignUpError ] = useState('');
   const [ signUpSuccess, setSignUpSuccess ] = useState(false);
 
-  const onChangePassword = useCallback((e) => {
-    setPassword(e.target.value);
-    setMismatchError(e.target.value !== passwordCheck);
-  },[passwordCheck]
+  const onChangePassword = useCallback(
+    (e) => {
+      setPassword(e.target.value);
+      setMismatchError(e.target.value !== passwordCheck);
+    },
+    [passwordCheck],
   );
 
-  const onChangePasswordCheck = useCallback((e) => {
-    setPasswordCheck(e.target.value);
-    setMismatchError(e.target.value !== password);
-  },[password]
+  const onChangePasswordCheck = useCallback(
+    (e) => {
+      setPasswordCheck(e.target.value);
+      setMismatchError(e.target.value !== password);
+    },
+    [password],
   );
 
   const onSubmit = useCallback((e) => {
@@ -48,7 +55,7 @@ const SignUp = () => {
       setSignUpError('');
       setSignUpSuccess(false);
       axios
-        .post('api/users', {
+        .post('/api/users', {
           email,
           nickname,
           password
@@ -67,6 +74,13 @@ const SignUp = () => {
   [email, nickname, password, passwordCheck, mismatchError]
   );
 
+  if (data === undefined) {
+    return <div>Loading...</div>;
+  }
+
+  if (data) {
+    return <Redirect to='/workspace/sleact/channel/일반' />
+  }
   return (
     <div id='container'>
       <Header>Chat</Header>
@@ -86,7 +100,7 @@ const SignUp = () => {
         <Label id='password-label'>
           <span>Password</span>
           <div>
-            <Input type='password' id='password' value={password} onChange={onChangePassword} />
+          <Input type="password" id="password" name="password" value={password} onChange={onChangePassword} />
           </div>
         </Label>
         <Label id='password-check-label'>
@@ -102,13 +116,13 @@ const SignUp = () => {
           {mismatchError && <Error>Passwords didn't match.</Error> }
           {!nickname && <Error>Input Nickname.</Error> }
           {signUpError && <Error>{signUpError}</Error>}
-          {signUpSuccess && <Error>You signed In!</Error>}
+          {signUpSuccess && <Success>You signed In!</Success>}
         </Label>
         <Button type='submit'>Sign Up</Button>
       </Form>
       <LinkContainer>
-        Did you already sign up?
-        <Link to='/signin'>Sign In</Link>
+        Did you already sign up?&nbsp;
+        <Link to='/login'>Login</Link>
       </LinkContainer>
     </div>
   );

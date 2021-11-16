@@ -1,16 +1,17 @@
-import React, { useState, useCallback } from 'react';
-import { useParams, NavLink } from 'react-router-dom';
 import { CollapseButton } from '@components/DMList/styles';
-import useSWR from 'swr';
-import { IUser } from '@typings/db';
 import fetcher from '@utils/fetcher';
+import React, { useState, useCallback } from 'react';
+import { useParams } from 'react-router';
+import { NavLink } from 'react-router-dom';
+import { IUser, IUserWithOnline } from '@typings/db';
+import useSWR from 'swr';
 
 const DMList = () => {
-  const { workspace } = useParams<{ workspace: string }>()
+  const { workspace } = useParams<{ workspace: string }>();
   const [ channelCollapse, setChannelCollapse ] = useState(false);
   const { data: userData, error, revalidate, mutate } = useSWR<IUser>('/api/users', fetcher);
-  const { data: memberData } = useSWR<IUser[]>(
-    userData? `/api/workspace/${workspace}/members`:null,
+  const { data: memberData } = useSWR<IUserWithOnline[]>(
+    userData ? `/api/workspaces/${workspace}/members`: null,
     fetcher,
     );
   const toggleChannelCollaps = useCallback(() => {
@@ -38,7 +39,7 @@ const DMList = () => {
           return (
             <NavLink key={member.id}
               activeClassName='selected'
-              to={`/workspace/${workspace}/dm/${member.id}`}
+              to={`/workspaces/${workspace}/dm/${member.id}`}
             >
             <i
               className={`c-icon p-channel_sidebar__presence_icon p-channel_sidebar__presence_icon--dim_enabled c-presence ${
@@ -50,6 +51,7 @@ const DMList = () => {
               data-qa-presence-active="false"
               data-qa-presence-dnd="false"
             />
+            <span>{ member.nickname }</span>
             </NavLink>
             )})}
     </div>
