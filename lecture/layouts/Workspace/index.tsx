@@ -1,18 +1,18 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, VFC } from 'react';
 import { 
   WorkspaceWrapper, 
   WorkspaceName, 
   Workspaces,
   Header, 
   Channels, 
-  ScrollMenu, 
+  MenuScroll, 
   Chats,
   RightMenu,
   ProfileImg,
   WorkspaceButton,
   AddButton,
   LogOutButton
- } from './style';
+ } from './styles';
 import useSWR from 'swr';
 import gravatar from 'gravatar';
 import { useParams, Redirect, Route, Switch } from 'react-router';
@@ -24,10 +24,26 @@ import Channel from '@pages/Channel';
 import fetcher from '@utils/fetcher';
 import DirectMessage from '@pages/DirectMessage';
 import axios from 'axios';
+import useSocket from '@hooks/useSocket';
 
-const Workspace = () => {
+const Workspace:VFC = () => {
   const { workspace } = useParams<{ workspace: string }>();
   const { data: userData, error, revalidate, mutate } = useSWR<IUser | false>('/api/users', fetcher);
+  const [ socket, disconnectSocket ] = useSocket(workspace);
+
+  useEffect(() => {
+    return () => {
+      console.info('disconnect socket', workspace);
+      disconnectSocket();
+    }
+  }, [workspace]);
+
+  useEffect(() => {
+    if (userData) {
+      console.info('Try to Login');
+      socket?.emit('login', { id: userData?.id, channels: [] });
+    }
+  }, [userData])
 
   const onLogout = useCallback(() => {
     axios.post('/api/users/logout', null, {
@@ -42,6 +58,7 @@ const Workspace = () => {
     return <Redirect to='/login' />;
   }
   console.log(userData)
+
   return (
     <div>
       <Header>
@@ -71,10 +88,10 @@ const Workspace = () => {
           <WorkspaceName>
             {userData?.Workspaces.find((ws) => ws.url === workspace)?.name}
           </WorkspaceName>
-          <ScrollMenu>
+          <MenuScroll>
           <ChannelList />
           <DMList />
-          </ScrollMenu>
+          </MenuScroll>
         </Channels>
         <Chats>
           <Switch>

@@ -140,7 +140,7 @@ export const WorkspaceName = styled.button`
   cursor: pointer;
 `;
 
-export const ScrollMenu = styled.div`
+export const MenuScroll = styled.div`
   height: calc(100vh - 102px);
   overflow-y: auto;
 `;
